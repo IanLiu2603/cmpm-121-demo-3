@@ -34,6 +34,9 @@ let playerPoints = 0;
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
 statusPanel.innerHTML = "0 Points";
 
+//Cache Coin Helper
+const coinMap = new Map<string, number>();
+
 //Cache Generation Helper
 function makeCache(i: number, j: number) {
   const possibleCache = leaflet.rectangle(leaflet.latLngBounds([
@@ -44,22 +47,32 @@ function makeCache(i: number, j: number) {
     ],
   ]));
   possibleCache.addTo(map);
+
   possibleCache.bindPopup(() => {
-    let cachedPoints = Math.floor(luck([i, j].toString()) * 100);
+    let cachedPoints: number;
+    if (coinMap.has(`${i},${j}`)) {
+      cachedPoints = coinMap.get(`${i},${j}`)!;
+    } else {
+      cachedPoints = Math.floor(luck([i, j].toString()) * 100);
+      coinMap.set(`${i},${j}`, cachedPoints);
+    }
     const popupText: HTMLDivElement = document.createElement("div");
     popupText.innerHTML =
       `<div> Cache at ${i}, ${j}. Cache contains <span id="value">${cachedPoints}</span> available coins.</div>
     <button id="take">Take</button> <button id="place">Place</button>`;
     popupText.querySelector("#take")!.addEventListener("click", () => {
       cachedPoints--;
+      coinMap.set(`${i},${j}`, cachedPoints);
       popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
         cachedPoints.toString();
       playerPoints++;
       statusPanel.innerHTML = `${playerPoints} points accumulated`;
     });
+
     popupText.querySelector("#place")!.addEventListener("click", () => {
       if (playerPoints > 0) {
         cachedPoints++;
+        coinMap.set(`${i},${j}`, cachedPoints);
         popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
           cachedPoints.toString();
         playerPoints--;
