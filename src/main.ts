@@ -10,7 +10,7 @@ const zoom = 19;
 const tileScalar = 1e-4;
 const cacheSpawnRadius = 8;
 const cacheSpawnRate = 0.1;
-const luckModifier: string = "test";
+const luckModifier: string = "test!";
 
 //Intialize Map
 const map = leaflet.map(document.getElementById("map")!, {
