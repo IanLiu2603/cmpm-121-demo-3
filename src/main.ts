@@ -34,12 +34,19 @@ const playerLocation = leaflet.marker(startingPoint);
 playerLocation.bindTooltip("Current Location");
 playerLocation.addTo(map);
 
-let playerPoints = 0;
+const playerCoins: Coin[] = [];
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
-statusPanel.innerHTML = "0 Points";
+statusPanel.innerHTML = "0 Coins";
+
+//Cache coin object
+interface Coin {
+  i: number;
+  j: number;
+  serial: number;
+}
 
 //Cache Coin Helper
-const coinMap = new Map<string, number>();
+const coinMap = new Map<string, Coin[]>();
 
 //Cache Generation Helper
 function makeCache(i: number, j: number) {
@@ -47,38 +54,42 @@ function makeCache(i: number, j: number) {
   const possibleCache = leaflet.rectangle(
     leaflet.latLngBounds(board.getCellBounds({ i, j })),
   );
-  console.log(leaflet.latLngBounds(board.getCellBounds({ i, j })));
   possibleCache.addTo(map);
 
   possibleCache.bindPopup(() => {
-    let cachedPoints: number;
+    let cachedCoins: Coin[] = [];
     if (coinMap.has(`${i},${j}`)) {
-      cachedPoints = coinMap.get(`${i},${j}`)!;
+      cachedCoins = coinMap.get(`${i},${j}`)!;
     } else {
-      cachedPoints = Math.floor(luck([i, j].toString()) * 100);
-      coinMap.set(`${i},${j}`, cachedPoints);
+      for (let n = Math.floor(luck([i, j].toString()) * 100); n > 0; n--) {
+        cachedCoins.push({ i: i, j: j, serial: n });
+      }
+      coinMap.set(`${i},${j}`, cachedCoins);
     }
     const popupText: HTMLDivElement = document.createElement("div");
     popupText.innerHTML =
-      `<div> Cache at ${i}, ${j}. Cache contains <span id="value">${cachedPoints}</span> available coins.</div>
+      `<div> Cache at ${i}, ${j}. Cache contains <span id="value">${cachedCoins.length}</span> available coins.</div>
     <button id="take">Take</button> <button id="place">Place</button>`;
     popupText.querySelector("#take")!.addEventListener("click", () => {
-      cachedPoints--;
-      coinMap.set(`${i},${j}`, cachedPoints);
-      popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-        cachedPoints.toString();
-      playerPoints++;
-      statusPanel.innerHTML = `${playerPoints} points accumulated`;
+      if (cachedCoins.length > 0) {
+        const tmp = cachedCoins.pop();
+        coinMap.set(`${i},${j}`, cachedCoins);
+        popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+          cachedCoins.length.toString();
+        playerCoins.push(tmp!);
+        statusPanel.innerHTML = `${playerCoins.length} coins accumulated`;
+        console.log(tmp!.serial);
+      }
     });
 
     popupText.querySelector("#place")!.addEventListener("click", () => {
-      if (playerPoints > 0) {
-        cachedPoints++;
-        coinMap.set(`${i},${j}`, cachedPoints);
+      if (playerCoins.length > 0) {
+        const tmp = playerCoins.pop();
+        cachedCoins.push(tmp!);
+        coinMap.set(`${i},${j}`, cachedCoins);
         popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-          cachedPoints.toString();
-        playerPoints--;
-        statusPanel.innerHTML = `${playerPoints} points accumulated`;
+          cachedCoins.length.toString();
+        statusPanel.innerHTML = `${playerCoins.length} Coins accumulated`;
       }
     });
     return popupText;
