@@ -94,7 +94,6 @@ function makeCache(i: number, j: number) {
           cachedCoins.length.toString();
         playerCoins.push(tmp!);
         statusPanel.innerHTML = `${playerCoins.length} coins accumulated`;
-        console.log(tmp!.serial);
         updateInventory();
       }
     });
