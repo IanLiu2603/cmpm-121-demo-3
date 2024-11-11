@@ -36,6 +36,8 @@ playerLocation.addTo(map);
 
 const playerCoins: Coin[] = [];
 const statusPanel = document.querySelector<HTMLDivElement>("#statusPanel")!;
+const inventoryPanel = document.querySelector<HTMLDivElement>("#inventory")!;
+inventoryPanel.innerHTML = "Inventory: <ul id='inventoryList'></ul>";
 statusPanel.innerHTML = "0 Coins";
 
 //Cache coin object
@@ -43,6 +45,20 @@ interface Coin {
   i: number;
   j: number;
   serial: number;
+}
+
+//Inventory updater
+function updateInventory() {
+  const inventoryList = document.querySelector<HTMLUListElement>(
+    "#inventoryList",
+  )!;
+  inventoryList.innerHTML = ""; // Clear current inventory
+
+  playerCoins.forEach((coin) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = `${coin.i}:${coin.j}#${coin.serial}`; // Use compact representation
+    inventoryList.appendChild(listItem);
+  });
 }
 
 //Cache Coin Helper
@@ -79,6 +95,7 @@ function makeCache(i: number, j: number) {
         playerCoins.push(tmp!);
         statusPanel.innerHTML = `${playerCoins.length} coins accumulated`;
         console.log(tmp!.serial);
+        updateInventory();
       }
     });
 
@@ -90,6 +107,7 @@ function makeCache(i: number, j: number) {
         popupText.querySelector<HTMLSpanElement>("#value")!.innerHTML =
           cachedCoins.length.toString();
         statusPanel.innerHTML = `${playerCoins.length} Coins accumulated`;
+        updateInventory();
       }
     });
     return popupText;
