@@ -86,7 +86,6 @@ function makeCache(i: number, j: number) {
 }
 
 //Generate caches
-board.getCellForPoint(startingPoint);
 const nearbyCells = board.getCellsNearPoint(startingPoint);
 
 nearbyCells.forEach((cell) => {

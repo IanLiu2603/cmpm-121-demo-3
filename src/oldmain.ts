@@ -3,18 +3,14 @@ import "leaflet/dist/leaflet.css";
 import "./style.css";
 import "./leafletWorkaround.ts";
 import luck from "./luck.ts";
-import { Board } from "./board.ts";
 
 //Settings
 const startingPoint = leaflet.latLng(36.989525, -122.062760);
 const zoom = 19;
-const tileWidth = 10;
+const tileScalar = 1e-4;
 const cacheSpawnRadius = 8;
 const cacheSpawnRate = 0.1;
 const luckModifier: string = "test!";
-
-//Initialize Board
-const board = new Board(tileWidth, cacheSpawnRadius);
 
 //Intialize Map
 const map = leaflet.map(document.getElementById("map")!, {
@@ -43,11 +39,13 @@ const coinMap = new Map<string, number>();
 
 //Cache Generation Helper
 function makeCache(i: number, j: number) {
-  board.getCellForPoint({ i, j });
-  const possibleCache = leaflet.rectangle(
-    leaflet.latLngBounds(board.getCellBounds({ i, j })),
-  );
-  console.log(leaflet.latLngBounds(board.getCellBounds({ i, j })));
+  const possibleCache = leaflet.rectangle(leaflet.latLngBounds([
+    [startingPoint.lat + i * tileScalar, startingPoint.lng + j * tileScalar],
+    [
+      startingPoint.lat + (i + 1) * tileScalar,
+      startingPoint.lng + (j + 1) * tileScalar,
+    ],
+  ]));
   possibleCache.addTo(map);
 
   possibleCache.bindPopup(() => {
@@ -86,11 +84,10 @@ function makeCache(i: number, j: number) {
 }
 
 //Generate caches
-board.getCellForPoint(startingPoint);
-const nearbyCells = board.getCellsNearPoint(startingPoint);
-
-nearbyCells.forEach((cell) => {
-  if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
-    makeCache(cell.i, cell.j);
+for (let i: number = -cacheSpawnRadius; i < cacheSpawnRadius; i++) {
+  for (let j: number = -cacheSpawnRadius; j < cacheSpawnRadius; j++) {
+    if (luck([i, j, luckModifier].toString()) < cacheSpawnRate) {
+      makeCache(i, j);
+    }
   }
-});
+}
