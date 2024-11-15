@@ -6,6 +6,7 @@ import luck from "./luck.ts";
 import { Board } from "./board.ts";
 
 //Settings
+const CELL_GRANULARITY = 1e-4;
 const startingPoint = leaflet.latLng(36.989525, -122.062760);
 const zoom = 19;
 const tileWidth = 10;
@@ -28,6 +29,8 @@ const map = leaflet.map(document.getElementById("map")!, {
 leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
 }).addTo(map);
+const cacheGroup = leaflet.layerGroup();
+cacheGroup.addTo(map);
 
 //Intialize Player
 const playerLocation = leaflet.marker(startingPoint);
@@ -70,7 +73,7 @@ function makeCache(i: number, j: number) {
   const possibleCache = leaflet.rectangle(
     leaflet.latLngBounds(board.getCellBounds({ i, j })),
   );
-  possibleCache.addTo(map);
+  cacheGroup.addLayer(possibleCache);
 
   possibleCache.bindPopup(() => {
     let cachedCoins: Coin[] = [];
@@ -113,12 +116,29 @@ function makeCache(i: number, j: number) {
   });
 }
 
-//Generate caches
-board.getCellForPoint(startingPoint);
-const nearbyCells = board.getCellsNearPoint(startingPoint);
+//Draw Map
+function drawMap(curLocation: leaflet.latLng) {
+  cacheGroup.clearLayers();
+  map.panTo(curLocation);
+  playerLocation.setLatLng(curLocation);
+  board.getCellForPoint(curLocation);
+  const nearbyCells = board.getCellsNearPoint(curLocation);
+  nearbyCells.forEach((cell) => {
+    if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
+      makeCache(cell.i, cell.j);
+    }
+  });
+}
+//Initial Cache Generation
+const currentPoint = startingPoint;
+drawMap(currentPoint);
 
-nearbyCells.forEach((cell) => {
-  if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
-    makeCache(cell.i, cell.j);
-  }
+//Player Movement
+const controlPanel = document.querySelector<HTMLDivElement>("#controlPanel")!;
+const upArrow = document.createElement("button");
+upArrow.innerHTML = "⬆️";
+upArrow.addEventListener("click", () => {
+  currentPoint.lat += CELL_GRANULARITY;
+  drawMap(currentPoint);
 });
+controlPanel.append(upArrow);

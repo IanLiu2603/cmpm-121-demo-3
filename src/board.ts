@@ -1,5 +1,7 @@
 import leaflet from "leaflet";
 
+const CELL_GRANULARITY = 1e-4;
+
 interface Cell {
   readonly i: number;
   readonly j: number;
@@ -30,14 +32,21 @@ export class Board {
 
   getCellForPoint(point: leaflet.LatLng): Cell {
     return this.getCanonicalCell({
-      i: point.lat / 1e-4,
-      j: point.lng / 1e-4,
+      i: point.lat / CELL_GRANULARITY,
+      j: point.lng / CELL_GRANULARITY,
     });
   }
 
   getCellBounds(cell: Cell): leaflet.LatLngBounds {
-    const tmp = leaflet.latLng(cell.i * 1e-4, cell.j * 1e-4);
-    return tmp.toBounds(this.tileWidth);
+    const topCorner = leaflet.latLng(
+      cell.i * CELL_GRANULARITY,
+      cell.j * CELL_GRANULARITY,
+    );
+    const bottomCorner = leaflet.latLng(
+      (cell.i + 1) * CELL_GRANULARITY,
+      (cell.j + 1) * CELL_GRANULARITY,
+    );
+    return leaflet.latLngBounds(topCorner, bottomCorner);
   }
 
   getCellsNearPoint(point: leaflet.LatLng): Cell[] {
