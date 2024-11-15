@@ -12,6 +12,7 @@ const zoom = 19;
 const tileWidth = 10;
 const cacheSpawnRadius = 8;
 const cacheSpawnRate = 0.1;
+let geolocation: boolean = false;
 const luckModifier: string = "test!";
 
 //Button Creater
@@ -166,3 +167,38 @@ controlPanel.append(upArrow);
 controlPanel.append(downArrow);
 controlPanel.append(leftArrow);
 controlPanel.append(rightArrow);
+
+//Auto Move
+const autoMove = CreateButton("🌐", () => {
+  if (!geolocation) {
+    geolocation = true;
+    map.locate({
+      setView: true,
+      maxZoom: zoom,
+      watch: true,
+    });
+  } else {
+    map.stopLocate();
+    geolocation = false;
+  }
+  console.log(geolocation);
+});
+controlPanel.append(autoMove);
+
+map.on("locationfound", (e: leaflet.LocationEvent) => {
+  if (geolocation) {
+    currentPoint.lat = e.latlng.lat;
+    currentPoint.lng = e.latlng.lng;
+    drawMap(currentPoint);
+  }
+});
+
+//Reset Map
+const trashButton = CreateButton("🚮", () => {
+  if (prompt("Type yes to reset the game") == "yes") {
+    coinMap.clear();
+    playerCoins.length = 0;
+    updateInventory();
+  }
+});
+controlPanel.append(trashButton);
