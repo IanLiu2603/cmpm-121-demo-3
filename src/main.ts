@@ -14,6 +14,17 @@ const cacheSpawnRadius = 8;
 const cacheSpawnRate = 0.1;
 const luckModifier: string = "test!";
 
+//Button Creater
+function CreateButton(
+  text: string,
+  clickHandler: () => void,
+): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.innerHTML = text;
+  button.addEventListener("click", clickHandler);
+  return button;
+}
+
 //Initialize Board
 const board = new Board(tileWidth, cacheSpawnRadius);
 
@@ -135,10 +146,23 @@ drawMap(currentPoint);
 
 //Player Movement
 const controlPanel = document.querySelector<HTMLDivElement>("#controlPanel")!;
-const upArrow = document.createElement("button");
-upArrow.innerHTML = "⬆️";
-upArrow.addEventListener("click", () => {
+const upArrow = CreateButton("⬆️", () => {
   currentPoint.lat += CELL_GRANULARITY;
   drawMap(currentPoint);
 });
+const downArrow = CreateButton("⬇️", () => {
+  currentPoint.lat -= CELL_GRANULARITY;
+  drawMap(currentPoint);
+});
+const leftArrow = CreateButton("⬅️", () => {
+  currentPoint.lng -= CELL_GRANULARITY;
+  drawMap(currentPoint);
+});
+const rightArrow = CreateButton("➡️", () => {
+  currentPoint.lng += CELL_GRANULARITY;
+  drawMap(currentPoint);
+});
 controlPanel.append(upArrow);
+controlPanel.append(downArrow);
+controlPanel.append(leftArrow);
+controlPanel.append(rightArrow);

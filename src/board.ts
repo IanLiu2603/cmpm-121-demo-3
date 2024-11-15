@@ -32,8 +32,8 @@ export class Board {
 
   getCellForPoint(point: leaflet.LatLng): Cell {
     return this.getCanonicalCell({
-      i: point.lat / CELL_GRANULARITY,
-      j: point.lng / CELL_GRANULARITY,
+      i: Math.round(point.lat / CELL_GRANULARITY),
+      j: Math.round(point.lng / CELL_GRANULARITY),
     });
   }
 
