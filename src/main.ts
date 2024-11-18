@@ -128,9 +128,19 @@ function makeCache(i: number, j: number) {
   });
 }
 
+//Polyline helper initialization
+const polyLines: leaflet.latLng[][] = [];
+const polyLineGroup = leaflet.layerGroup().addTo(map);
+let _polyline: leaflet.Polyline;
+function pushToPolyLine() {
+  const tmp = leaflet.latLng(currentPoint.lat, currentPoint.lng);
+  polyLines[polyLines.length - 1].push(tmp);
+}
+
 //Draw Map
 function drawMap(curLocation: leaflet.latLng) {
   cacheGroup.clearLayers();
+  polyLineGroup.clearLayers();
   map.panTo(curLocation);
   playerLocation.setLatLng(curLocation);
   board.getCellForPoint(curLocation);
@@ -140,27 +150,38 @@ function drawMap(curLocation: leaflet.latLng) {
       makeCache(cell.i, cell.j);
     }
   });
+  polyLines.forEach((line) => {
+    if (line.length > 1) {
+      _polyline = leaflet.polyline(line, { color: "red" }).addTo(polyLineGroup);
+    }
+  });
 }
 //Initial Cache Generation
 const currentPoint = startingPoint;
+polyLines.push([]);
+pushToPolyLine();
 drawMap(currentPoint);
 
 //Player Movement
 const controlPanel = document.querySelector<HTMLDivElement>("#controlPanel")!;
 const upArrow = CreateButton("⬆️", () => {
   currentPoint.lat += CELL_GRANULARITY;
+  pushToPolyLine();
   drawMap(currentPoint);
 });
 const downArrow = CreateButton("⬇️", () => {
   currentPoint.lat -= CELL_GRANULARITY;
+  pushToPolyLine();
   drawMap(currentPoint);
 });
 const leftArrow = CreateButton("⬅️", () => {
   currentPoint.lng -= CELL_GRANULARITY;
+  pushToPolyLine();
   drawMap(currentPoint);
 });
 const rightArrow = CreateButton("➡️", () => {
   currentPoint.lng += CELL_GRANULARITY;
+  pushToPolyLine();
   drawMap(currentPoint);
 });
 controlPanel.append(upArrow);
@@ -172,6 +193,7 @@ controlPanel.append(rightArrow);
 const autoMove = CreateButton("🌐", () => {
   if (!geolocation) {
     geolocation = true;
+    polyLines.push([]);
     map.locate({
       setView: true,
       maxZoom: zoom,
@@ -179,6 +201,8 @@ const autoMove = CreateButton("🌐", () => {
     });
   } else {
     map.stopLocate();
+    polyLines.push([]);
+    pushToPolyLine();
     geolocation = false;
   }
   console.log(geolocation);
@@ -189,6 +213,7 @@ map.on("locationfound", (e: leaflet.LocationEvent) => {
   if (geolocation) {
     currentPoint.lat = e.latlng.lat;
     currentPoint.lng = e.latlng.lng;
+    pushToPolyLine();
     drawMap(currentPoint);
   }
 });
@@ -199,6 +224,32 @@ const trashButton = CreateButton("🚮", () => {
     coinMap.clear();
     playerCoins.length = 0;
     updateInventory();
+    statusPanel.innerHTML = `${playerCoins.length} coins accumulated`;
+    polyLines.length = 1;
+    polyLines[0] = [];
+    drawMap(currentPoint);
   }
 });
 controlPanel.append(trashButton);
+
+//Save state
+// function saveState(){
+//   const state = {
+//     currentPoint:{lat: currentPoint.lat,
+//       lng: currentPoint.lng,},
+//     playerCoins: playerCoins,
+//     coinMap: coinMap
+//   }
+//   localStorage.setItem("state", JSON.stringify(state));
+// }
+
+// function loadState(){
+//   const prevState = localStorage.getItem("state")
+
+//   if(prevState){
+//     const loadState = JSON.parse(prevState);
+//     currentPoint.lat = loadState.currentPoint.lat;
+//     currentPoint.lng = loadState.currentPoint.lng;
+
+//   }
+// }
