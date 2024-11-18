@@ -156,6 +156,7 @@ function drawMap(curLocation: leaflet.latLng) {
     }
   });
 }
+
 //Initial Cache Generation
 const currentPoint = startingPoint;
 polyLines.push([]);
@@ -233,23 +234,31 @@ const trashButton = CreateButton("🚮", () => {
 controlPanel.append(trashButton);
 
 //Save state
-// function saveState(){
-//   const state = {
-//     currentPoint:{lat: currentPoint.lat,
-//       lng: currentPoint.lng,},
-//     playerCoins: playerCoins,
-//     coinMap: coinMap
-//   }
-//   localStorage.setItem("state", JSON.stringify(state));
-// }
 
-// function loadState(){
-//   const prevState = localStorage.getItem("state")
+function saveState() {
+  const arrayCoinMap = Array.from(coinMap);
+  const state = {
+    currentPoint: { lat: currentPoint.lat, lng: currentPoint.lng },
+    playerCoins: playerCoins,
+    coinMap: arrayCoinMap,
+    polyLines: polyLines,
+  };
+  localStorage.setItem("state", JSON.stringify(state));
+  console.log("saved");
+}
 
-//   if(prevState){
-//     const loadState = JSON.parse(prevState);
-//     currentPoint.lat = loadState.currentPoint.lat;
-//     currentPoint.lng = loadState.currentPoint.lng;
+function loadState() {
+  const prevState = localStorage.getItem("state");
+  if (prevState) {
+    console.log("asda");
+    const loadState = JSON.parse(prevState);
+    currentPoint.lat = loadState.currentPoint.lat;
+    currentPoint.lng = loadState.currentPoint.lng;
+    drawMap(currentPoint);
+  }
+}
 
-//   }
-// }
+const saveButton = CreateButton("💾", saveState);
+const loadButton = CreateButton("🔄", loadState);
+controlPanel.append(saveButton);
+controlPanel.append(loadButton);
