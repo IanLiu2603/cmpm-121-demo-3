@@ -11,9 +11,8 @@ const startingPoint = leaflet.latLng(36.989525, -122.062760);
 const zoom = 19;
 const tileWidth = 10;
 const cacheSpawnRadius = 8;
-const cacheSpawnRate = 0.1;
 let geolocation: boolean = false;
-const luckModifier: string = "test!";
+
 
 //Button Creater
 function CreateButton(
@@ -144,12 +143,6 @@ function drawMap(curLocation: leaflet.latLng) {
   map.panTo(curLocation);
   playerLocation.setLatLng(curLocation);
   board.getCellForPoint(curLocation);
-  const nearbyCells = board.getCellsNearPoint(curLocation);
-  nearbyCells.forEach((cell) => {
-    if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
-      makeCache(cell.i, cell.j);
-    }
-  });
   const nearbyCaches = board.getCachesNearPoint(curLocation);
   nearbyCaches.forEach((cell)=> {
     makeCache(cell.i,cell.j);
