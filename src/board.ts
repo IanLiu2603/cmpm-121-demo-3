@@ -1,6 +1,9 @@
 import leaflet from "leaflet";
+import luck from "./luck.ts"
 
 const CELL_GRANULARITY = 1e-4;
+const luckModifier: string = "test!";
+const cacheSpawnRate = 0.1;
 
 interface Cell {
   readonly i: number;
@@ -70,5 +73,16 @@ export class Board {
       }
     }
     return resultCells;
+  }
+
+  getCachesNearPoint(curLocation: leaflet.LatLng){
+    const nearbyCells = this.getCellsNearPoint(curLocation);
+    const nearbyCaches: {i,j}[] = [];
+    nearbyCells.forEach((cell) => {
+      if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
+        nearbyCaches.push({i:cell.i, j:cell.j});
+      }
+    });
+    return nearbyCaches;
   }
 }
