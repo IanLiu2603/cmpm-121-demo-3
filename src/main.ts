@@ -146,7 +146,7 @@ function drawMap(curLocation: leaflet.latLng) {
   const nearbyCaches = board.getCachesNearPoint(curLocation);
   nearbyCaches.forEach((cell)=> {
     makeCache(cell.i,cell.j);
-  })
+  });
   polyLines.forEach((line) => {
     if (line.length > 1) {
       _polyline = leaflet.polyline(line, { color: "red" }).addTo(polyLineGroup);

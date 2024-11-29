@@ -1,5 +1,5 @@
 import leaflet from "leaflet";
-import luck from "./luck.ts"
+import luck from "./luck.ts";
 
 const CELL_GRANULARITY = 1e-4;
 const luckModifier: string = "test!";
