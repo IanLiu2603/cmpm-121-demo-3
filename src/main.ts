@@ -13,7 +13,6 @@ const tileWidth = 10;
 const cacheSpawnRadius = 8;
 let geolocation: boolean = false;
 
-
 //Button Creater
 function CreateButton(
   text: string,
@@ -144,8 +143,8 @@ function drawMap(curLocation: leaflet.latLng) {
   playerLocation.setLatLng(curLocation);
   board.getCellForPoint(curLocation);
   const nearbyCaches = board.getCachesNearPoint(curLocation);
-  nearbyCaches.forEach((cell)=> {
-    makeCache(cell.i,cell.j);
+  nearbyCaches.forEach((cell) => {
+    makeCache(cell.i, cell.j);
   });
   polyLines.forEach((line) => {
     if (line.length > 1) {
