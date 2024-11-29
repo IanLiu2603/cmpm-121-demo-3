@@ -77,7 +77,7 @@ export class Board {
 
   getCachesNearPoint(curLocation: leaflet.LatLng){
     const nearbyCells = this.getCellsNearPoint(curLocation);
-    const nearbyCaches: {i,j}[] = [];
+    const nearbyCaches: Cell[] = [];
     nearbyCells.forEach((cell) => {
       if (luck([cell.i, cell.j, luckModifier].toString()) < cacheSpawnRate) {
         nearbyCaches.push({i:cell.i, j:cell.j});
